@@ -5,10 +5,10 @@ import ReactFlow, {
   addEdge,
   useNodesState,
   useEdgesState,
-  MarkerType,
-  Panel,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import { ChevronLeft, ChevronRight, Network } from 'lucide-react';
+import '../index.css'
 
 const componentTypes = {
   // IAM Components
@@ -90,26 +90,13 @@ const componentTypes = {
   }
 };
 
-const edgeTypes = [
-  { id: 'default', label: 'Default' },
-  { id: 'step', label: 'Step' },
-  { id: 'smoothstep', label: 'Smooth Step' },
-  { id: 'straight', label: 'Straight' },
-];
-
-const edgeStyles = [
-  { id: 'solid', label: 'Solid' },
-  { id: 'dashed', label: 'Dashed' },
-  { id: 'dotted', label: 'Dotted' },
-];
-
 const initialNodes = [];
 const initialEdges = [];
 
 const IamFlowDiagram = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [isComponentMenuOpen, setIsComponentMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge({ ...params, animated: false }, eds)),
@@ -146,8 +133,8 @@ const IamFlowDiagram = () => {
           background: componentTypes[type].color,
           padding: 10,
           borderRadius: 5,
-          border: '1px solid #e2e8f0',  // Lighter border
-          color: '#4a5568',  // Darker text for contrast
+          border: '1px solid #e2e8f0',
+          color: '#4a5568',
         },
       };
 
@@ -161,62 +148,88 @@ const IamFlowDiagram = () => {
     event.dataTransfer.effectAllowed = 'move';
   };
 
+  // Group components by category
+  const groupedComponents = Object.entries(componentTypes).reduce((acc, [key, value]) => {
+    if (!acc[value.category]) {
+      acc[value.category] = [];
+    }
+    acc[value.category].push({ key, ...value });
+    return acc;
+  }, {});
+
   return (
-    <div className="flex flex-col h-screen bg-white">
-      {/* Top Menu Bar */}
-      <div className="bg-white border-b border-gray-100 p-4">
-        <div className="flex items-center justify-between max-w-6xl mx-auto">
-          <h1 className="text-xl font-semibold text-gray-700">we are the architects.</h1>
-          </div>
+    <div className="flex h-screen bg-white">
+      {/* Sidebar */}
+      <div className={`${isCollapsed ? 'w-16' : 'w-80'} bg-gray-50 border-r border-gray-200 transition-all duration-300`}>
+        {/* Sidebar Header */}
+        <div className="h-14 border-b border-gray-200 flex items-center px-4">
+          {/* <Network className="h-6 w-6 text-gray-700" /> */}
+          {!isCollapsed && (
+            <span className="ml-2 text-lg font-semibold text-gray-700">components.</span>
+          )}
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="ml-auto p-2 hover:bg-gray-100 rounded-md"
+          >
+            {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+          </button>
+        </div>
+
+        {/* Component List */}
+        <div className="p-4 overflow-y-auto h-[calc(100vh-3.5rem)]">
+          {!isCollapsed && Object.entries(groupedComponents).map(([category, components]) => (
+            <div key={category} className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-500 mb-2">
+                {category}
+              </h3>
+              <div className="space-y-2">
+                {components.map(({ key, label, color, description }) => (
+                  <div
+                    key={key}
+                    draggable
+                    onDragStart={(event) => onDragStart(event, key)}
+                    className="rounded-md border border-gray-200 p-3 cursor-move hover:shadow-sm transition-shadow"
+                    style={{ backgroundColor: color }}
+                  >
+                    <div className="font-medium text-gray-700">{label}</div>
+                    <p className="text-sm text-gray-500">{description}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="h-px bg-gray-200 my-4" />
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-grow p-6">
-        <div className="max-w-6xl mx-auto h-full flex"> 
-          {/* Components Menu */}
-          <div className="bg-white p-4 mb-4 rounded-lg border border-gray-100 w-64 
-               flex flex-col overflow-y-auto">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">drag and drop your technologies</h3>
-            <div className="flex flex-col gap-4"> 
-              {Object.entries(componentTypes).map(([type, { label, color }]) => (
-                <div
-                  key={type}
-                  className="p-3 rounded cursor-move border border-gray-100 hover:shadow-sm transition-shadow"
-                  style={{ 
-                    backgroundColor: color,
-                    color: '#4a5568',  // Darker text for contrast
-                  }}
-                  draggable
-                  onDragStart={(event) => onDragStart(event, type)}
-                >
-                  {label}
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <header className="h-14 border-b border-gray-200 flex items-center px-6 bg-white">
+          <h1 className="text-xl font-semibold text-gray-800 ml-auto">we are the architects.</h1>
+        </header>
 
-          {/* Flow Canvas */}
-          <div className="flex-grow bg-white rounded-lg border border-gray-100" style={{ height: '600px' }}>
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
-              onDrop={onDrop}
-              onDragOver={onDragOver}
-              fitView
-              defaultViewport={{ x: 0, y: 0, zoom: 1.5 }}
-            >
-              <Background 
-                color="#aaa" 
-                variant="dots" 
-                gap={12} 
-                size={1} 
-              /> 
-              <Controls />
-            </ReactFlow>
-          </div>
+        {/* Flow Canvas */}
+        <div className="flex-1 bg-gray-50">
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            fitView
+            defaultViewport={{ x: 0, y: 0, zoom: 1.5 }}
+          >
+            <Background 
+              color="#aaa" 
+              variant="dots" 
+              gap={12} 
+              size={1} 
+            /> 
+            <Controls />
+          </ReactFlow>
         </div>
       </div>
     </div>
