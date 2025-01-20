@@ -8,7 +8,6 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { ChevronLeft, ChevronRight, Network } from 'lucide-react';
-import '../index.css'
 
 const componentTypes = {
   // IAM Components
@@ -160,23 +159,23 @@ const IamFlowDiagram = () => {
   return (
     <div className="flex h-screen bg-white">
       {/* Sidebar */}
-      <div className={`${isCollapsed ? 'w-16' : 'w-80'} bg-gray-50 border-r border-gray-200 transition-all duration-300`}>
+      <div className={`${isCollapsed ? 'w-16' : 'w-80'} bg-white border-r border-gray-200 transition-all duration-300`}>
         {/* Sidebar Header */}
-        <div className="h-14 border-b border-gray-200 flex items-center px-4">
+        <div className="h-14 border-b border-gray-200 flex items-center px-4 bg-white">
           {/* <Network className="h-6 w-6 text-gray-700" /> */}
           {!isCollapsed && (
             <span className="ml-2 text-lg font-semibold text-gray-700">components.</span>
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="ml-auto p-2 hover:bg-gray-100 rounded-md"
+            className="ml-auto p-2 hover:bg-gray-50 rounded-md text-gray-600"
           >
             {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
           </button>
         </div>
 
         {/* Component List */}
-        <div className="p-4 overflow-y-auto h-[calc(100vh-3.5rem)]">
+        <div className="p-4 overflow-y-auto h-[calc(100vh-3.5rem)] bg-white">
           {!isCollapsed && Object.entries(groupedComponents).map(([category, components]) => (
             <div key={category} className="mb-6">
               <h3 className="text-sm font-semibold text-gray-500 mb-2">
@@ -188,7 +187,7 @@ const IamFlowDiagram = () => {
                     key={key}
                     draggable
                     onDragStart={(event) => onDragStart(event, key)}
-                    className="rounded-md border border-gray-200 p-3 cursor-move hover:shadow-sm transition-shadow"
+                    className="rounded-md border border-gray-200 p-3 cursor-move hover:shadow-sm transition-all hover:border-gray-300"
                     style={{ backgroundColor: color }}
                   >
                     <div className="font-medium text-gray-700">{label}</div>
@@ -205,8 +204,8 @@ const IamFlowDiagram = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="h-14 border-b border-gray-200 flex items-center px-6 bg-white">
-          <h1 className="text-xl font-semibold text-gray-800 ml-auto">we are the architects.</h1>
+        <header className="h-14 border-b border-gray-200 flex items-center justify-end px-6 bg-white">
+          <h1 className="text-xl font-semibold text-gray-800">we are the architects.</h1>
         </header>
 
         {/* Flow Canvas */}
