@@ -52,7 +52,7 @@ const CustomNode = memo(({ data, id, style }) => {
 const componentTypes = {
   // COMMON Components
   AWS: {
-    label: '',
+    label: 'Amazon Web Services',
     category: 'Common',
     color: '#f0f7ff',
     description: '',
@@ -62,31 +62,36 @@ const componentTypes = {
     label: 'Salesforce',
     category: 'Common',
     color: '#f0f7ff',
-    description: ''
+    description: '',
+    icon: <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Salesforce.com_logo.svg/2560px-Salesforce.com_logo.svg.png" alt="Salesforce logo" />
   },
   Slack: {
     label: 'Slack',
     category: 'Common',
     color: '#f0f7ff',
-    description: ''
+    description: '',
+    icon: <img src="https://1000logos.net/wp-content/uploads/2021/06/Slack-logo.png" alt="Slack logo" />
   },
   Zoom: {
     label: 'Zoom',
     category: 'Common',
     color: '#f0f7ff',
-    description: ''
+    description: '',
+    icon: <img src="https://images.seeklogo.com/logo-png/38/2/zoom-fondo-blanco-vertical-logo-png_seeklogo-381383.png" alt="Zoom logo" />
   },
   GCP: {
     label: 'Google Cloud Platform',
     category: 'Common',
     color: '#f0f7ff',
-    description: ''
+    description: '',
+    icon: <img src="https://static-00.iconduck.com/assets.00/google-cloud-icon-2048x1646-7admxejz.png" alt="GCP logo" />
   },
   Okta: {
     label: 'Okta',
     category: 'Common',
     color: '#f0f7ff',
-    description: ''
+    description: '',
+    icon: <img src="https://www.s3-uk.com/wp-content/uploads/2023/03/Okta-logo.png" alt="Okta logo" />
   },
 
   // IAM Components
@@ -165,7 +170,15 @@ const componentTypes = {
     category: 'IGA',
     color: '#fff5f5',
     description: 'Enforces compliance policies'
-  }
+  },
+
+  // Networking
+  server: {
+    label: 'Server',
+    category: 'Networking',
+    color: '#fff5f5',
+    description: ''
+  },
 };
 
 
