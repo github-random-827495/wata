@@ -22,28 +22,28 @@ const CustomNode = memo(({ data, id, style }) => {
       <Handle 
         type="target" 
         position={Position.Top} 
-        className="!top-0 !translate-y-0 w-3 h-3 !bg-blue-400"
+        className="!top-0 !translate-y-0 w-2.5 h-2.5 !bg-neutral-300"
       />
-      <div style={style} className="relative group px-3 py-2">
+      <div style={style} className="relative group px-4 py-3">
         <button
           onClick={handleDelete}
-          className="absolute -top-2 -right-2 p-1 bg-red-100 hover:bg-red-200 rounded-full text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute -top-2 -right-2 p-1 bg-neutral-100 hover:bg-neutral-200 rounded-full text-neutral-600 opacity-0 group-hover:opacity-100 transition-opacity"
         >
           <X className="h-3 w-3" />
         </button>
-        <div className="font-medium">{data.label}</div>
+        <div className="font-medium tracking-tight">{data.label}</div>
         {data.icon && (
           <img 
             src={data.icon.props.src} 
             alt={data.icon.props.alt} 
-            className="h-6 w-6 object-contain"
+            className="h-5 w-5 object-contain opacity-80 mt-2"
           />
         )}
       </div>
       <Handle 
         type="source" 
         position={Position.Bottom} 
-        className="!bottom-0 !translate-y-0 w-3 h-3 !bg-blue-400"
+        className="!bottom-0 !translate-y-0 w-2.5 h-2.5 !bg-neutral-300"
       />
     </>
   );
@@ -283,67 +283,71 @@ const IamFlowDiagram = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-white">
-      {/* Full-width Header */}
-      <header className="h-14 border-b border-gray-200 flex items-center justify-between px-6 bg-white">
-        <h1 className="text-xl font-semibold text-gray-800">we are the architects.</h1>
+    <div className="flex flex-col h-screen bg-white font-sans">
+      {/* Header */}
+      <header className="h-16 border-b border-neutral-100 flex items-center justify-between px-8">
+        <h1 className="text-lg font-medium text-neutral-800 tracking-tight">we are the architects.</h1>
       </header>
 
-      {/* Main content area with sidebars */}
+      {/* Main content area */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar */}
-        <div className={`${isLeftCollapsed ? 'w-16' : 'w-80'} bg-white border-r border-gray-200 transition-all duration-300`}>
+        <div className={`${isLeftCollapsed ? 'w-16' : 'w-[340px]'} bg-white border-r border-neutral-100 transition-all duration-300`}>
           {/* Component List */}
           <div 
-            className="overflow-y-auto h-[calc(100vh-7rem)] bg-white [&::-webkit-scrollbar]:w-2 
+            className="overflow-y-auto h-[calc(100vh-4rem)] bg-white px-2
+              [&::-webkit-scrollbar]:w-1.5
               [&::-webkit-scrollbar-track]:bg-transparent
-              [&::-webkit-scrollbar-thumb]:bg-gray-200
+              [&::-webkit-scrollbar-thumb]:bg-neutral-200
               [&::-webkit-scrollbar-thumb]:rounded-full
               [&::-webkit-scrollbar-thumb]:border-4
               [&::-webkit-scrollbar-thumb]:border-transparent
               [&::-webkit-scrollbar-thumb]:bg-clip-padding
-              [&::-webkit-scrollbar-thumb]:hover:bg-gray-300
-              hover:[&::-webkit-scrollbar-thumb]:bg-gray-300
+              hover:[&::-webkit-scrollbar-thumb]:bg-neutral-300
               firefox:scrollbar-thin
-              firefox:scrollbar-thumb-gray-200
+              firefox:scrollbar-thumb-neutral-200
               firefox:scrollbar-track-transparent"
           >
             {!isLeftCollapsed && Object.entries(groupedComponents).map(([category, components]) => (
-              <div key={category} className="p-4">
-                <h3 className="text-sm font-semibold text-gray-500 mb-2">
+              <div key={category} className="py-6 first:pt-4">
+                <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wide px-4 mb-3">
                   {category}
                 </h3>
-                <div className="space-y-2">
+                <div className="space-y-2 px-2">
                   {components.map(({ key, label, color, description, icon }) => (
                     <div
                       key={key}
                       draggable
                       onDragStart={(event) => onDragStart(event, key)}
-                      className="rounded-md border border-gray-200 p-3 cursor-move hover:shadow-sm transition-all hover:border-gray-300"
+                      className="rounded-lg border border-neutral-100 p-3.5 cursor-move 
+                        hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] 
+                        transition-all duration-200 
+                        hover:border-neutral-200"
                       style={{ backgroundColor: color }}
                     >
-                      <div className="flex items-center mb-1">
+                      <div className="flex items-center gap-2.5">
                         {icon && (
                           <img 
                             src={icon.props.src} 
                             alt={icon.props.alt} 
-                            className="h-5 w-5 mr-2 object-contain"
+                            className="h-5 w-5 object-contain opacity-80"
                           />
                         )}
-                        <div className="font-medium text-gray-700">{label}</div>
+                        <div className="font-medium text-sm text-neutral-700">{label}</div>
                       </div>
-                      <p className="text-sm text-gray-500">{description}</p>
+                      {description && (
+                        <p className="text-xs text-neutral-500 mt-1.5 leading-relaxed">{description}</p>
+                      )}
                     </div>
                   ))}
                 </div>
-                <div className="h-px bg-gray-200 my-4" />
               </div>
             ))}
           </div>
         </div>
 
         {/* Main Flow Canvas */}
-        <div className="flex-1 bg-gray-50">
+        <div className="flex-1 bg-neutral-50">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -356,64 +360,55 @@ const IamFlowDiagram = () => {
             fitView
             defaultViewport={{ x: 0, y: 0, zoom: 1.5 }}
           >
-            <Background color="#aaa" variant="dots" gap={12} size={1} />
-            <Controls />
+            <Background color="#999" variant="dots" gap={16} size={1} />
+            <Controls className="!bg-white !shadow-[0_2px_8px_rgba(0,0,0,0.08)] !rounded-lg !border !border-neutral-100" />
           </ReactFlow>
         </div>
 
         {/* Right Sidebar */}
-        <div className={`${isRightCollapsed ? 'w-16' : 'w-80'} bg-white border-l border-gray-200 transition-all duration-300`}>
-          {/* Right Sidebar Header */}
-          {/* <div className="h-14 border-b border-gray-200 flex items-center px-4 bg-white">
-            <button
-              onClick={() => setIsRightCollapsed(!isRightCollapsed)}
-              className="mr-2 p-2 hover:bg-gray-50 rounded-md text-gray-600"
-            >
-              {isRightCollapsed ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-            </button>
-            {!isRightCollapsed && (
-              <span className="text-lg font-semibold text-gray-700">Canvas Summary</span>
-            )}
-          </div> */}
-
-          {/* Right Sidebar Content */}
+        <div className={`${isRightCollapsed ? 'w-16' : 'w-[340px]'} bg-white border-l border-neutral-100 transition-all duration-300`}>
           {!isRightCollapsed && (
-            <div className="overflow-y-auto h-[calc(100vh-7rem)] bg-white p-4">
-<center>
-            <button
-              onClick={clearCanvas}
-              className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
-            >
-              <X className="h-4 w-4" />
-                 Clear Canvas
+            <div className="overflow-y-auto h-[calc(100vh-4rem)] bg-white p-6">
+              <button
+                onClick={clearCanvas}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 
+                  bg-neutral-100 text-neutral-600 rounded-lg 
+                  hover:bg-neutral-200 transition-colors
+                  text-sm font-medium"
+              >
+                <X className="h-4 w-4" />
+                Clear Canvas
               </button>
-              </center>
-              <br></br>
+              
               {/* Canvas Summary */}
               {Object.entries(getNodesByCategory()).map(([category, categoryNodes]) => (
-                <div key={category} className="mb-6">
-                  <h3 className="text-sm font-semibold text-gray-500 mb-2">
+                <div key={category} className="mt-8">
+                  <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wide mb-3">
                     {category} ({categoryNodes.length})
                   </h3>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {categoryNodes.map((node) => (
                       <div
                         key={node.id}
-                        className="flex items-center justify-between p-2 rounded-md border border-gray-200 hover:border-gray-300"
+                        className="flex items-center justify-between p-2.5 rounded-md 
+                          border border-neutral-100 hover:border-neutral-200
+                          hover:shadow-[0_1px_4px_rgba(0,0,0,0.04)]
+                          transition-all duration-200"
                       >
                         <div className="flex items-center gap-2">
                           {componentTypes[node.id.split('-')[0]]?.icon && (
                             <img
                               src={componentTypes[node.id.split('-')[0]].icon.props.src}
                               alt={componentTypes[node.id.split('-')[0]].icon.props.alt}
-                              className="h-4 w-4 object-contain"
+                              className="h-4 w-4 object-contain opacity-80"
                             />
                           )}
-                          <span className="text-sm text-gray-700">{node.data.label}</span>
+                          <span className="text-sm text-neutral-600">{node.data.label}</span>
                         </div>
                         <button
                           onClick={() => deleteNode(node.id)}
-                          className="p-1 hover:bg-red-50 rounded-full text-red-600"
+                          className="p-1 hover:bg-neutral-100 rounded-full text-neutral-400 
+                            hover:text-neutral-600 transition-colors"
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -424,7 +419,7 @@ const IamFlowDiagram = () => {
               ))}
 
               {nodes.length === 0 && (
-                <div className="text-center text-gray-500 mt-8">
+                <div className="text-center text-neutral-400 mt-8 text-sm">
                   No components added to canvas
                 </div>
               )}
