@@ -9,7 +9,7 @@ import ReactFlow, {
   Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 // Custom Node Component
 const CustomNode = memo(({ data, id, style }) => {
