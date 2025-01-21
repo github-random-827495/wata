@@ -32,6 +32,13 @@ const CustomNode = memo(({ data, id, style }) => {
           <X className="h-3 w-3" />
         </button>
         <div className="font-medium">{data.label}</div>
+        {data.icon && (
+            <img 
+              src={data.icon.props.src} 
+              alt={data.icon.props.alt} 
+              className="h-6 w-6 object-contain" // Use object-contain 
+            />
+          )}
       </div>
       <Handle 
         type="source" 
@@ -43,6 +50,45 @@ const CustomNode = memo(({ data, id, style }) => {
 });
 
 const componentTypes = {
+  // COMMON Components
+  AWS: {
+    label: '',
+    category: 'Common',
+    color: '#f0f7ff',
+    description: '',
+    icon: <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Amazon_Web_Services_Logo.svg/1200px-Amazon_Web_Services_Logo.svg.png" alt="AWS logo" />
+  },
+  SFDC: {
+    label: 'Salesforce',
+    category: 'Common',
+    color: '#f0f7ff',
+    description: ''
+  },
+  Slack: {
+    label: 'Slack',
+    category: 'Common',
+    color: '#f0f7ff',
+    description: ''
+  },
+  Zoom: {
+    label: 'Zoom',
+    category: 'Common',
+    color: '#f0f7ff',
+    description: ''
+  },
+  GCP: {
+    label: 'Google Cloud Platform',
+    category: 'Common',
+    color: '#f0f7ff',
+    description: ''
+  },
+  Okta: {
+    label: 'Okta',
+    category: 'Common',
+    color: '#f0f7ff',
+    description: ''
+  },
+
   // IAM Components
   idStore: {
     label: 'Identity Store',
@@ -177,6 +223,7 @@ const IamFlowDiagram = () => {
         data: { 
           label: componentTypes[type].label,
           onDelete: deleteNode,
+          icon: componentTypes[type].icon
         },
         style: {
           background: componentTypes[type].color,
@@ -230,7 +277,7 @@ const IamFlowDiagram = () => {
                 {category}
               </h3>
               <div className="space-y-2">
-                {components.map(({ key, label, color, description }) => (
+                {components.map(({ key, label, color, description, icon }) => (
                   <div
                     key={key}
                     draggable
@@ -238,6 +285,13 @@ const IamFlowDiagram = () => {
                     className="rounded-md border border-gray-200 p-3 cursor-move hover:shadow-sm transition-all hover:border-gray-300"
                     style={{ backgroundColor: color }}
                   >
+                    {icon && ( 
+                <img 
+                  src={icon.props.src} 
+                  alt={icon.props.alt} 
+                  className="h-5 w-5 mr-2 object-contain" 
+                />
+              )}
                     <div className="font-medium text-gray-700">{label}</div>
                     <p className="text-sm text-gray-500">{description}</p>
                   </div>
