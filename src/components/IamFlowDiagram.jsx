@@ -9,7 +9,7 @@ import ReactFlow, {
   Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { X } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Custom Node Component
 const CustomNode = memo(({ data, id, style }) => {
@@ -33,12 +33,12 @@ const CustomNode = memo(({ data, id, style }) => {
         </button>
         <div className="font-medium">{data.label}</div>
         {data.icon && (
-            <img 
-              src={data.icon.props.src} 
-              alt={data.icon.props.alt} 
-              className="h-6 w-6 object-contain" // Use object-contain 
-            />
-          )}
+          <img 
+            src={data.icon.props.src} 
+            alt={data.icon.props.alt} 
+            className="h-6 w-6 object-contain"
+          />
+        )}
       </div>
       <Handle 
         type="source" 
@@ -179,145 +179,164 @@ const nodeTypes = {
 const IamFlowDiagram = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
+  const [isRightCollapsed, setIsRightCollapsed] = useState(false);
 
-const onConnect = useCallback(
-  (params) => setEdges((eds) => addEdge({ ...params, animated: false }, eds)),
-  [setEdges]
-);
+  const onConnect = useCallback(
+    (params) => setEdges((eds) => addEdge({ ...params, animated: false }, eds)),
+    [setEdges]
+  );
 
-const clearCanvas = useCallback(() => {
-  setNodes([]);
-  setEdges([]);
-}, [setNodes, setEdges]);
+  const clearCanvas = useCallback(() => {
+    setNodes([]);
+    setEdges([]);
+  }, [setNodes, setEdges]);
 
-const deleteNode = useCallback((nodeId) => {
-  setNodes((nds) => nds.filter((node) => node.id !== nodeId));
-  setEdges((eds) => eds.filter(
-    (edge) => edge.source !== nodeId && edge.target !== nodeId
-  ));
-}, [setNodes, setEdges]);
+  const deleteNode = useCallback((nodeId) => {
+    setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+    setEdges((eds) => eds.filter(
+      (edge) => edge.source !== nodeId && edge.target !== nodeId
+    ));
+  }, [setNodes, setEdges]);
 
-const onDragOver = useCallback((event) => {
-  event.preventDefault();
-  event.dataTransfer.dropEffect = 'move';
-}, []);
-
-const onDrop = useCallback(
-  (event) => {
+  const onDragOver = useCallback((event) => {
     event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
 
-    const type = event.dataTransfer.getData('application/reactflow');
-    if (!type) return;
+  const onDrop = useCallback(
+    (event) => {
+      event.preventDefault();
 
-    const reactFlowBounds = document.querySelector('.react-flow').getBoundingClientRect();
-    
-    const position = {
-      x: event.clientX - reactFlowBounds.left,
-      y: event.clientY - reactFlowBounds.top,
-    };
+      const type = event.dataTransfer.getData('application/reactflow');
+      if (!type) return;
 
-    const newNode = {
-      id: `${type}-${nodes.length + 1}`,
-      type: 'custom',
-      position,
-      data: { 
-        label: componentTypes[type].label,
-        onDelete: deleteNode,
-        icon: componentTypes[type].icon
-      },
-      style: {
-        background: componentTypes[type].color,
-        borderRadius: 5,
-        border: '1px solid #e2e8f0',
-        color: '#4a5568',
-        minWidth: 150,
-      },
-    };
+      const reactFlowBounds = document.querySelector('.react-flow').getBoundingClientRect();
+      
+      const position = {
+        x: event.clientX - reactFlowBounds.left,
+        y: event.clientY - reactFlowBounds.top,
+      };
 
-    setNodes((nds) => nds.concat(newNode));
-  },
-  [nodes, setNodes, deleteNode]
-);
+      const newNode = {
+        id: `${type}-${nodes.length + 1}`,
+        type: 'custom',
+        position,
+        data: { 
+          label: componentTypes[type].label,
+          onDelete: deleteNode,
+          icon: componentTypes[type].icon
+        },
+        style: {
+          background: componentTypes[type].color,
+          borderRadius: 5,
+          border: '1px solid #e2e8f0',
+          color: '#4a5568',
+          minWidth: 150,
+        },
+      };
 
-const onDragStart = (event, nodeType) => {
-  event.dataTransfer.setData('application/reactflow', nodeType);
-  event.dataTransfer.effectAllowed = 'move';
-};
+      setNodes((nds) => nds.concat(newNode));
+    },
+    [nodes, setNodes, deleteNode]
+  );
 
-const groupedComponents = Object.entries(componentTypes).reduce((acc, [key, value]) => {
-  if (!acc[value.category]) {
-    acc[value.category] = [];
-  }
-  acc[value.category].push({ key, ...value });
-  return acc;
-}, {});
+  const onDragStart = (event, nodeType) => {
+    event.dataTransfer.setData('application/reactflow', nodeType);
+    event.dataTransfer.effectAllowed = 'move';
+  };
+
+  const groupedComponents = Object.entries(componentTypes).reduce((acc, [key, value]) => {
+    if (!acc[value.category]) {
+      acc[value.category] = [];
+    }
+    acc[value.category].push({ key, ...value });
+    return acc;
+  }, {});
+
+  // Group nodes by category
+  const getNodesByCategory = () => {
+    return nodes.reduce((acc, node) => {
+      const nodeType = node.id.split('-')[0];
+      const category = componentTypes[nodeType]?.category;
+      if (category) {
+        if (!acc[category]) {
+          acc[category] = [];
+        }
+        acc[category].push(node);
+      }
+      return acc;
+    }, {});
+  };
 
   return (
-    <div className="flex h-screen bg-white">
-      {/* Sidebar */}
-      <div className={`${isCollapsed ? 'w-16' : 'w-80'} bg-white border-r border-gray-200 transition-all duration-300`}>
-        {/* Sidebar Header */}
-        <div className="h-14 border-b border-gray-200 flex items-center px-4 bg-white">
-          {!isCollapsed && (
-            <span className="ml-2 text-lg font-semibold text-gray-700">we are the architects.</span>
-          )}
-          {/* <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="ml-auto p-2 hover:bg-gray-50 rounded-md text-gray-600"
-          >
-            {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
-          </button> */}
-        </div>
-        {/* Component List */}
-        <div className="p-4 overflow-y-auto h-[calc(100vh-3.5rem)] bg-white">
-          {!isCollapsed && Object.entries(groupedComponents).map(([category, components]) => (
-            <div key={category} className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-500 mb-2">
-                {category}
-              </h3>
-              <div className="space-y-2">
-                {components.map(({ key, label, color, description, icon }) => (
-                  <div
-                    key={key}
-                    draggable
-                    onDragStart={(event) => onDragStart(event, key)}
-                    className="rounded-md border border-gray-200 p-3 cursor-move hover:shadow-sm transition-all hover:border-gray-300"
-                    style={{ backgroundColor: color }}
-                  >
-                    {icon && ( 
-                <img 
-                  src={icon.props.src} 
-                  alt={icon.props.alt} 
-                  className="h-5 w-5 mr-2 object-contain" 
-                />
-              )}
-                    <div className="font-medium text-gray-700">{label}</div>
-                    <p className="text-sm text-gray-500">{description}</p>
-                  </div>
-                ))}
+    <div className="flex flex-col h-screen bg-white">
+      {/* Full-width Header */}
+      <header className="h-14 border-b border-gray-200 flex items-center justify-between px-6 bg-white">
+        <h1 className="text-xl font-semibold text-gray-800">we are the architects.</h1>
+        {/* <button
+          onClick={clearCanvas}
+          className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
+        >
+          <X className="h-4 w-4" />
+          Clear Canvas
+        </button> */}
+      </header>
+
+      {/* Main content area with sidebars */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar */}
+        <div className={`${isLeftCollapsed ? 'w-16' : 'w-80'} bg-white border-r border-gray-200 transition-all duration-300`}>
+          {/* Left Sidebar Header */}
+          {/* <div className="h-14 border-b border-gray-200 flex items-center px-4 bg-white"> */}
+            {/* {!isLeftCollapsed && (
+              <span className="text-lg font-semibold text-gray-700">Components</span>
+            )}
+            {/* <button
+              onClick={() => setIsLeftCollapsed(!isLeftCollapsed)}
+              className="ml-auto p-2 hover:bg-gray-50 rounded-md text-gray-600"
+            >
+              {isLeftCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+            </button> */} */}
+          {/* </div> */}
+
+          {/* Component List */}
+          <div className="overflow-y-auto h-[calc(100vh-7rem)] bg-white">
+            {!isLeftCollapsed && Object.entries(groupedComponents).map(([category, components]) => (
+              <div key={category} className="p-4">
+                <h3 className="text-sm font-semibold text-gray-500 mb-2">
+                  {category}
+                </h3>
+                <div className="space-y-2">
+                  {components.map(({ key, label, color, description, icon }) => (
+                    <div
+                      key={key}
+                      draggable
+                      onDragStart={(event) => onDragStart(event, key)}
+                      className="rounded-md border border-gray-200 p-3 cursor-move hover:shadow-sm transition-all hover:border-gray-300"
+                      style={{ backgroundColor: color }}
+                    >
+                      <div className="flex items-center mb-1">
+                        {icon && (
+                          <img 
+                            src={icon.props.src} 
+                            alt={icon.props.alt} 
+                            className="h-5 w-5 mr-2 object-contain"
+                          />
+                        )}
+                        <div className="font-medium text-gray-700">{label}</div>
+                      </div>
+                      <p className="text-sm text-gray-500">{description}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="h-px bg-gray-200 my-4" />
               </div>
-              <div className="h-px bg-gray-200 my-4" />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="h-14 border-b border-gray-200 flex items-center justify-between px-6 bg-white">
-          {/* <h1 className="text-xl font-semibold text-gray-800">we are the architects.</h1> */}
-          <button
-            onClick={clearCanvas}
-            className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
-          >
-            <X className="h-4 w-4" />
-            Clear Canvas
-          </button>
-        </header>
-
-        {/* Flow Canvas */}
+        {/* Main Flow Canvas */}
         <div className="flex-1 bg-gray-50">
           <ReactFlow
             nodes={nodes}
@@ -331,18 +350,81 @@ const groupedComponents = Object.entries(componentTypes).reduce((acc, [key, valu
             fitView
             defaultViewport={{ x: 0, y: 0, zoom: 1.5 }}
           >
-            <Background 
-              color="#aaa" 
-              variant="dots" 
-              gap={12} 
-              size={1} 
-            /> 
+            <Background color="#aaa" variant="dots" gap={12} size={1} />
             <Controls />
           </ReactFlow>
         </div>
+
+        {/* Right Sidebar */}
+        <div className={`${isRightCollapsed ? 'w-16' : 'w-80'} bg-white border-l border-gray-200 transition-all duration-300`}>
+          {/* Right Sidebar Header */}
+          {/* <div className="h-14 border-b border-gray-200 flex items-center px-4 bg-white">
+            <button
+              onClick={() => setIsRightCollapsed(!isRightCollapsed)}
+              className="mr-2 p-2 hover:bg-gray-50 rounded-md text-gray-600"
+            >
+              {isRightCollapsed ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+            </button>
+            {!isRightCollapsed && (
+              <span className="text-lg font-semibold text-gray-700">Canvas Summary</span>
+            )}
+          </div> */}
+
+          {/* Right Sidebar Content */}
+          {!isRightCollapsed && (
+            <div className="overflow-y-auto h-[calc(100vh-7rem)] bg-white p-4">
+
+            <button
+              onClick={clearCanvas}
+              className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
+            >
+              <X className="h-4 w-4" />
+                 Clear Canvas
+              </button>
+
+              {/* Canvas Summary */}
+              {Object.entries(getNodesByCategory()).map(([category, categoryNodes]) => (
+                <div key={category} className="mb-6">
+                  <h3 className="text-sm font-semibold text-gray-500 mb-2">
+                    {category} ({categoryNodes.length})
+                  </h3>
+                  <div className="space-y-2">
+                    {categoryNodes.map((node) => (
+                      <div
+                        key={node.id}
+                        className="flex items-center justify-between p-2 rounded-md border border-gray-200 hover:border-gray-300"
+                      >
+                        <div className="flex items-center gap-2">
+                          {componentTypes[node.id.split('-')[0]]?.icon && (
+                            <img
+                              src={componentTypes[node.id.split('-')[0]].icon.props.src}
+                              alt={componentTypes[node.id.split('-')[0]].icon.props.alt}
+                              className="h-4 w-4 object-contain"
+                            />
+                          )}
+                          <span className="text-sm text-gray-700">{node.data.label}</span>
+                        </div>
+                        <button
+                          onClick={() => deleteNode(node.id)}
+                          className="p-1 hover:bg-red-50 rounded-full text-red-600"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              {nodes.length === 0 && (
+                <div className="text-center text-gray-500 mt-8">
+                  No components added to canvas
+                </div>
+              )}
+            </div>
+          )}
         </div>
-        <div>
-        </div>
+      </div>
     </div>
   );
 };
