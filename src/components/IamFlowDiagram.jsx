@@ -287,34 +287,27 @@ const IamFlowDiagram = () => {
       {/* Full-width Header */}
       <header className="h-14 border-b border-gray-200 flex items-center justify-between px-6 bg-white">
         <h1 className="text-xl font-semibold text-gray-800">we are the architects.</h1>
-        {/* <button
-          onClick={clearCanvas}
-          className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
-        >
-          <X className="h-4 w-4" />
-          Clear Canvas
-        </button> */}
       </header>
 
       {/* Main content area with sidebars */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar */}
         <div className={`${isLeftCollapsed ? 'w-16' : 'w-80'} bg-white border-r border-gray-200 transition-all duration-300`}>
-          {/* Left Sidebar Header */}
-          {/* <div className="h-14 border-b border-gray-200 flex items-center px-4 bg-white"> */}
-            {/* {!isLeftCollapsed && (
-              <span className="text-lg font-semibold text-gray-700">Components</span>
-            )}
-            {/* <button
-              onClick={() => setIsLeftCollapsed(!isLeftCollapsed)}
-              className="ml-auto p-2 hover:bg-gray-50 rounded-md text-gray-600"
-            >
-              {isLeftCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
-            </button> */} */}
-          {/* </div> */}
-
           {/* Component List */}
-          <div className="overflow-y-auto h-[calc(100vh-7rem)] bg-white">
+          <div 
+            className="overflow-y-auto h-[calc(100vh-7rem)] bg-white [&::-webkit-scrollbar]:w-2 
+              [&::-webkit-scrollbar-track]:bg-transparent
+              [&::-webkit-scrollbar-thumb]:bg-gray-200
+              [&::-webkit-scrollbar-thumb]:rounded-full
+              [&::-webkit-scrollbar-thumb]:border-4
+              [&::-webkit-scrollbar-thumb]:border-transparent
+              [&::-webkit-scrollbar-thumb]:bg-clip-padding
+              [&::-webkit-scrollbar-thumb]:hover:bg-gray-300
+              hover:[&::-webkit-scrollbar-thumb]:bg-gray-300
+              firefox:scrollbar-thin
+              firefox:scrollbar-thumb-gray-200
+              firefox:scrollbar-track-transparent"
+          >
             {!isLeftCollapsed && Object.entries(groupedComponents).map(([category, components]) => (
               <div key={category} className="p-4">
                 <h3 className="text-sm font-semibold text-gray-500 mb-2">
@@ -395,7 +388,7 @@ const IamFlowDiagram = () => {
                  Clear Canvas
               </button>
               </center>
-
+              <br></br>
               {/* Canvas Summary */}
               {Object.entries(getNodesByCategory()).map(([category, categoryNodes]) => (
                 <div key={category} className="mb-6">
