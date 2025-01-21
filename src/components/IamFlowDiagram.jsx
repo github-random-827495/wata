@@ -168,6 +168,7 @@ const componentTypes = {
   }
 };
 
+
 const initialNodes = [];
 const initialEdges = [];
 
@@ -180,77 +181,77 @@ const IamFlowDiagram = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge({ ...params, animated: false }, eds)),
-    [setEdges]
-  );
+const onConnect = useCallback(
+  (params) => setEdges((eds) => addEdge({ ...params, animated: false }, eds)),
+  [setEdges]
+);
 
-  const clearCanvas = useCallback(() => {
-    setNodes([]);
-    setEdges([]);
-  }, [setNodes, setEdges]);
+const clearCanvas = useCallback(() => {
+  setNodes([]);
+  setEdges([]);
+}, [setNodes, setEdges]);
 
-  const deleteNode = useCallback((nodeId) => {
-    setNodes((nds) => nds.filter((node) => node.id !== nodeId));
-    setEdges((eds) => eds.filter(
-      (edge) => edge.source !== nodeId && edge.target !== nodeId
-    ));
-  }, [setNodes, setEdges]);
+const deleteNode = useCallback((nodeId) => {
+  setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+  setEdges((eds) => eds.filter(
+    (edge) => edge.source !== nodeId && edge.target !== nodeId
+  ));
+}, [setNodes, setEdges]);
 
-  const onDragOver = useCallback((event) => {
+const onDragOver = useCallback((event) => {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+}, []);
+
+const onDrop = useCallback(
+  (event) => {
     event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-  }, []);
 
-  const onDrop = useCallback(
-    (event) => {
-      event.preventDefault();
+    const type = event.dataTransfer.getData('application/reactflow');
+    if (!type) return;
 
-      const type = event.dataTransfer.getData('application/reactflow');
-      if (!type) return;
+    const reactFlowBounds = document.querySelector('.react-flow').getBoundingClientRect();
+    
+    const position = {
+      x: event.clientX - reactFlowBounds.left,
+      y: event.clientY - reactFlowBounds.top,
+    };
 
-      const reactFlowBounds = document.querySelector('.react-flow').getBoundingClientRect();
-      
-      const position = {
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
-      };
+    const newNode = {
+      id: `${type}-${nodes.length + 1}`,
+      type: 'custom',
+      position,
+      data: { 
+        label: componentTypes[type].label,
+        onDelete: deleteNode,
+        icon: componentTypes[type].icon
+      },
+      style: {
+        background: componentTypes[type].color,
+        borderRadius: 5,
+        border: '1px solid #e2e8f0',
+        color: '#4a5568',
+        minWidth: 150,
+      },
+    };
 
-      const newNode = {
-        id: `${type}-${nodes.length + 1}`,
-        type: 'custom',
-        position,
-        data: { 
-          label: componentTypes[type].label,
-          onDelete: deleteNode,
-          icon: componentTypes[type].icon
-        },
-        style: {
-          background: componentTypes[type].color,
-          borderRadius: 5,
-          border: '1px solid #e2e8f0',
-          color: '#4a5568',
-          minWidth: 150,
-        },
-      };
+    setNodes((nds) => nds.concat(newNode));
+  },
+  [nodes, setNodes, deleteNode]
+);
 
-      setNodes((nds) => nds.concat(newNode));
-    },
-    [nodes, setNodes, deleteNode]
-  );
+const onDragStart = (event, nodeType) => {
+  event.dataTransfer.setData('application/reactflow', nodeType);
+  event.dataTransfer.effectAllowed = 'move';
+};
 
-  const onDragStart = (event, nodeType) => {
-    event.dataTransfer.setData('application/reactflow', nodeType);
-    event.dataTransfer.effectAllowed = 'move';
-  };
-
-  const groupedComponents = Object.entries(componentTypes).reduce((acc, [key, value]) => {
-    if (!acc[value.category]) {
-      acc[value.category] = [];
-    }
-    acc[value.category].push({ key, ...value });
-    return acc;
-  }, {});
+const groupedComponents = Object.entries(componentTypes).reduce((acc, [key, value]) => {
+  if (!acc[value.category]) {
+    acc[value.category] = [];
+  }
+  acc[value.category].push({ key, ...value });
+  return acc;
+}, {});
 
   return (
     <div className="flex h-screen bg-white">
@@ -268,7 +269,6 @@ const IamFlowDiagram = () => {
             {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
           </button> */}
         </div>
-
         {/* Component List */}
         <div className="p-4 overflow-y-auto h-[calc(100vh-3.5rem)] bg-white">
           {!isCollapsed && Object.entries(groupedComponents).map(([category, components]) => (
@@ -340,7 +340,9 @@ const IamFlowDiagram = () => {
             <Controls />
           </ReactFlow>
         </div>
-      </div>
+        </div>
+        <div>
+        </div>
     </div>
   );
 };

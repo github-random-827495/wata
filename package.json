@@ -22,10 +22,14 @@
     "lucide-react": "^0.473.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-mui-sidebar": "^1.5.8",
+    "react-sidebar": "^3.0.2",
+    "react-sidebar-component": "^1.0.7",
     "reactflow": "^11.11.4",
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-numeric-separator": "^7.18.6",
     "@eslint/js": "^9.17.0",
     "@shadcn/ui": "^0.0.4",
     "@types/react": "^18.3.18",
