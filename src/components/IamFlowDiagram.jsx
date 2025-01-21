@@ -373,7 +373,7 @@ const IamFlowDiagram = () => {
           {/* Right Sidebar Content */}
           {!isRightCollapsed && (
             <div className="overflow-y-auto h-[calc(100vh-7rem)] bg-white p-4">
-
+<center>
             <button
               onClick={clearCanvas}
               className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
@@ -381,6 +381,7 @@ const IamFlowDiagram = () => {
               <X className="h-4 w-4" />
                  Clear Canvas
               </button>
+              </center>
 
               {/* Canvas Summary */}
               {Object.entries(getNodesByCategory()).map(([category, categoryNodes]) => (
