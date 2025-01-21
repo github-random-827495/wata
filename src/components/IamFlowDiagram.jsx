@@ -1,13 +1,46 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import ReactFlow, {
   Controls,
   Background,
   addEdge,
   useNodesState,
   useEdgesState,
+  Handle,
+  Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { ChevronLeft, ChevronRight, Network } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+
+// Custom Node Component
+const CustomNode = memo(({ data, id, style }) => {
+  const handleDelete = () => {
+    data.onDelete(id);
+  };
+
+  return (
+    <>
+      <Handle 
+        type="target" 
+        position={Position.Top} 
+        className="!top-0 !translate-y-0 w-3 h-3 !bg-blue-400"
+      />
+      <div style={style} className="relative group px-3 py-2">
+        <button
+          onClick={handleDelete}
+          className="absolute -top-2 -right-2 p-1 bg-red-100 hover:bg-red-200 rounded-full text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <X className="h-3 w-3" />
+        </button>
+        <div className="font-medium">{data.label}</div>
+      </div>
+      <Handle 
+        type="source" 
+        position={Position.Bottom} 
+        className="!bottom-0 !translate-y-0 w-3 h-3 !bg-blue-400"
+      />
+    </>
+  );
+});
 
 const componentTypes = {
   // IAM Components
@@ -92,6 +125,10 @@ const componentTypes = {
 const initialNodes = [];
 const initialEdges = [];
 
+const nodeTypes = {
+  custom: CustomNode,
+};
+
 const IamFlowDiagram = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -101,6 +138,18 @@ const IamFlowDiagram = () => {
     (params) => setEdges((eds) => addEdge({ ...params, animated: false }, eds)),
     [setEdges]
   );
+
+  const clearCanvas = useCallback(() => {
+    setNodes([]);
+    setEdges([]);
+  }, [setNodes, setEdges]);
+
+  const deleteNode = useCallback((nodeId) => {
+    setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+    setEdges((eds) => eds.filter(
+      (edge) => edge.source !== nodeId && edge.target !== nodeId
+    ));
+  }, [setNodes, setEdges]);
 
   const onDragOver = useCallback((event) => {
     event.preventDefault();
@@ -123,23 +172,24 @@ const IamFlowDiagram = () => {
 
       const newNode = {
         id: `${type}-${nodes.length + 1}`,
-        type: 'default',
+        type: 'custom',
         position,
         data: { 
           label: componentTypes[type].label,
+          onDelete: deleteNode,
         },
         style: {
           background: componentTypes[type].color,
-          padding: 10,
           borderRadius: 5,
           border: '1px solid #e2e8f0',
           color: '#4a5568',
+          minWidth: 150,
         },
       };
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [nodes, setNodes]
+    [nodes, setNodes, deleteNode]
   );
 
   const onDragStart = (event, nodeType) => {
@@ -147,7 +197,6 @@ const IamFlowDiagram = () => {
     event.dataTransfer.effectAllowed = 'move';
   };
 
-  // Group components by category
   const groupedComponents = Object.entries(componentTypes).reduce((acc, [key, value]) => {
     if (!acc[value.category]) {
       acc[value.category] = [];
@@ -162,7 +211,6 @@ const IamFlowDiagram = () => {
       <div className={`${isCollapsed ? 'w-16' : 'w-80'} bg-white border-r border-gray-200 transition-all duration-300`}>
         {/* Sidebar Header */}
         <div className="h-14 border-b border-gray-200 flex items-center px-4 bg-white">
-          {/* <Network className="h-6 w-6 text-gray-700" /> */}
           {!isCollapsed && (
             <span className="ml-2 text-lg font-semibold text-gray-700">components.</span>
           )}
@@ -204,8 +252,15 @@ const IamFlowDiagram = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="h-14 border-b border-gray-200 flex items-center justify-end px-6 bg-white">
+        <header className="h-14 border-b border-gray-200 flex items-center justify-between px-6 bg-white">
           <h1 className="text-xl font-semibold text-gray-800">we are the architects.</h1>
+          <button
+            onClick={clearCanvas}
+            className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
+          >
+            <X className="h-4 w-4" />
+            Clear Canvas
+          </button>
         </header>
 
         {/* Flow Canvas */}
@@ -218,6 +273,7 @@ const IamFlowDiagram = () => {
             onConnect={onConnect}
             onDrop={onDrop}
             onDragOver={onDragOver}
+            nodeTypes={nodeTypes}
             fitView
             defaultViewport={{ x: 0, y: 0, zoom: 1.5 }}
           >
