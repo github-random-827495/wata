@@ -212,14 +212,14 @@ const IamFlowDiagram = () => {
         {/* Sidebar Header */}
         <div className="h-14 border-b border-gray-200 flex items-center px-4 bg-white">
           {!isCollapsed && (
-            <span className="ml-2 text-lg font-semibold text-gray-700">components.</span>
+            <span className="ml-2 text-lg font-semibold text-gray-700">we are the architects.</span>
           )}
-          <button
+          {/* <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="ml-auto p-2 hover:bg-gray-50 rounded-md text-gray-600"
           >
             {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
-          </button>
+          </button> */}
         </div>
 
         {/* Component List */}
@@ -253,7 +253,7 @@ const IamFlowDiagram = () => {
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <header className="h-14 border-b border-gray-200 flex items-center justify-between px-6 bg-white">
-          <h1 className="text-xl font-semibold text-gray-800">we are the architects.</h1>
+          {/* <h1 className="text-xl font-semibold text-gray-800">we are the architects.</h1> */}
           <button
             onClick={clearCanvas}
             className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
