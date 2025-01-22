@@ -181,7 +181,6 @@ const componentTypes = {
   },
 };
 
-
 const initialNodes = [];
 const initialEdges = [];
 
@@ -194,6 +193,7 @@ const IamFlowDiagram = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
+  const [projectTitle, setProjectTitle] = useState('Untitled Project');
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge({ ...params, animated: false }, eds)),
@@ -267,7 +267,6 @@ const IamFlowDiagram = () => {
     return acc;
   }, {});
 
-  // Group nodes by category
   const getNodesByCategory = () => {
     return nodes.reduce((acc, node) => {
       const nodeType = node.id.split('-')[0];
@@ -347,7 +346,14 @@ const IamFlowDiagram = () => {
         </div>
 
         {/* Main Flow Canvas */}
-        <div className="flex-1 bg-neutral-50">
+        <div className="flex-1 bg-neutral-50 relative">
+          {/* Title Overlay */}
+          <div className="absolute top-6 left-6 z-10 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-neutral-100 shadow-sm">
+            <h2 className="text-lg font-medium text-neutral-700 tracking-tight">
+              {projectTitle}
+            </h2>
+          </div>
+          
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -369,17 +375,38 @@ const IamFlowDiagram = () => {
         <div className={`${isRightCollapsed ? 'w-16' : 'w-[340px]'} bg-white border-l border-neutral-100 transition-all duration-300`}>
           {!isRightCollapsed && (
             <div className="overflow-y-auto h-[calc(100vh-4rem)] bg-white p-6">
-              <button
-                onClick={clearCanvas}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 
-                  bg-neutral-100 text-neutral-600 rounded-lg 
-                  hover:bg-neutral-200 transition-colors
-                  text-sm font-medium"
-              >
-                <X className="h-4 w-4" />
-                Clear Canvas
-              </button>
-              
+              {/* Control Section */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="projectTitle" className="text-xs font-medium text-neutral-400 uppercase tracking-wide">
+                    Project Title
+                  </label>
+                  <input
+                    id="projectTitle"
+                    type="text"
+                    value={projectTitle}
+                    onChange={(e) => setProjectTitle(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-neutral-50
+                      border border-neutral-100 
+                      focus:border-neutral-200 focus:ring-2 focus:ring-neutral-50 
+                      transition-all duration-200 text-sm text-neutral-700
+                      placeholder:text-neutral-400"
+                    placeholder="Enter project title..."
+                  />
+                </div>
+                
+                <button
+                  onClick={clearCanvas}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 
+                    bg-neutral-100 text-neutral-600 rounded-lg 
+                    hover:bg-neutral-200 transition-colors
+                    text-sm font-medium"
+                >
+                  <X className="h-4 w-4" />
+                  Clear Canvas
+                </button>
+              </div>
+
               {/* Canvas Summary */}
               {Object.entries(getNodesByCategory()).map(([category, categoryNodes]) => (
                 <div key={category} className="mt-8">
