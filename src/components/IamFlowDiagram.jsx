@@ -5,33 +5,91 @@ import ReactFlow, {
   addEdge,
   useNodesState,
   useEdgesState,
+  NodeResizer,
   Handle,
   Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X } from 'lucide-react';
 
-// Custom Node Component
-const CustomNode = memo(({ data, id, style }) => {
+const CustomNode = memo(({ data, id, selected, ...nodeProps }) => {
+  const [nodeName, setNodeName] = useState(data.label);
+  const [isEditing, setIsEditing] = useState(false);
+
   const handleDelete = () => {
     data.onDelete(id);
   };
 
+  const handleNameChange = (e) => {
+    setNodeName(e.target.value);
+  };
+
+  const handleNameSubmit = () => {
+    data.onUpdate(id, nodeName);
+    setIsEditing(false);
+  };
+
   return (
     <>
+      {selected && (
+        <NodeResizer 
+          color="#1a365d" 
+          isVisible={true}
+          minWidth={100}
+          minHeight={50}
+        />
+      )}
       <Handle 
         type="target" 
         position={Position.Top} 
         className="!top-0 !translate-y-0 w-2.5 h-2.5 !bg-neutral-300"
       />
-      <div style={style} className="relative group px-4 py-3">
+      <div 
+        {...nodeProps} 
+        className="relative group px-4 py-3"
+      >
         <button
           onClick={handleDelete}
           className="absolute -top-2 -right-2 p-1 bg-neutral-100 hover:bg-neutral-200 rounded-full text-neutral-600 opacity-0 group-hover:opacity-100 transition-opacity"
         >
           <X className="h-3 w-3" />
         </button>
-        <div className="font-medium tracking-tight">{data.label}</div>
+        
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <input 
+              type="text"
+              value={nodeName}
+              onChange={handleNameChange}
+              className="w-full px-2 py-1 text-sm border rounded"
+            />
+            <button 
+              onClick={handleNameSubmit}
+              className="text-sm bg-neutral-100 text-neutral-600 px-2 py-1 rounded hover:bg-neutral-200 transition-colors"
+            >
+              Save
+            </button>
+          </div>
+        ) : (
+          <div 
+            className="font-medium tracking-tight flex items-center justify-between"
+            onDoubleClick={() => setIsEditing(true)}
+          >
+            {data.label}
+            {selected && (
+              <button 
+                onClick={() => setIsEditing(true)}
+                className="w-full flex items-center justify-center gap-2 
+                  px-4 py-2.5 bg-neutral-100 text-neutral-600 rounded-lg 
+                  hover:bg-neutral-200 transition-colors
+                  text-sm font-medium"
+              >
+                Edit
+              </button>
+            )}
+          </div>
+        )}
+
         {data.icon && (
           <img 
             src={data.icon.props.src} 
@@ -179,6 +237,14 @@ const componentTypes = {
     color: '#fff5f5',
     description: ''
   },
+
+  // Boundaries
+  boundary: {
+    label: 'On Premise',
+    category: 'Boundary',
+    color: '#fff5f5',
+    description: ''
+  },
 };
 
 const initialNodes = [];
@@ -194,6 +260,16 @@ const IamFlowDiagram = () => {
   const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
   const [projectTitle, setProjectTitle] = useState('Untitled Project');
+
+  const updateNodeMethod = useCallback((nodeId, newLabel) => {
+    setNodes((nds) => 
+      nds.map((node) => 
+        node.id === nodeId 
+          ? { ...node, data: { ...node.data, label: newLabel } } 
+          : node
+      )
+    );
+  }, [setNodes]);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge({ ...params, animated: false }, eds)),
@@ -238,6 +314,7 @@ const IamFlowDiagram = () => {
         data: { 
           label: componentTypes[type].label,
           onDelete: deleteNode,
+          onUpdate: updateNodeMethod,  // Add update method to node data
           icon: componentTypes[type].icon
         },
         style: {
@@ -251,7 +328,7 @@ const IamFlowDiagram = () => {
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [nodes, setNodes, deleteNode]
+    [nodes, setNodes, deleteNode, updateNodeMethod]
   );
 
   const onDragStart = (event, nodeType) => {
