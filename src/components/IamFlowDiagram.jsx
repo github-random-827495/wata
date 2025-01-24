@@ -240,7 +240,7 @@ const componentTypes = {
 
   // Boundaries
   boundary: {
-    label: 'On Premise',
+    label: 'Network Boundary',
     category: 'Boundary',
     color: '#fff5f5',
     description: ''
@@ -307,6 +307,8 @@ const IamFlowDiagram = () => {
         y: event.clientY - reactFlowBounds.top,
       };
 
+      const backgroundComponents = ['boundary'];
+
       const newNode = {
         id: `${type}-${nodes.length + 1}`,
         type: 'custom',
@@ -323,6 +325,7 @@ const IamFlowDiagram = () => {
           border: '1px solid #e2e8f0',
           color: '#4a5568',
           minWidth: 150,
+          zIndex: backgroundComponents.includes(type) ? -1 : 0,
         },
       };
 
