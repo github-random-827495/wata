@@ -10,7 +10,7 @@ import ReactFlow, {
   Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { X } from 'lucide-react';
+import { X, ChevronRight, ChevronDown } from 'lucide-react';
 
 const CustomNode = memo(({ data, id, selected, ...nodeProps }) => {
   const [nodeName, setNodeName] = useState(data.label);
@@ -106,6 +106,58 @@ const CustomNode = memo(({ data, id, selected, ...nodeProps }) => {
     </>
   );
 });
+
+const ComponentCategory = ({ category, components, onDragStart }) => {
+  const [isExpanded, setIsExpanded] = useState(category === 'Common');
+
+  return (
+    <div className="py-6 first:pt-4">
+      <div 
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="flex items-center cursor-pointer px-4 mb-3"
+      >
+        <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wide flex-1">
+          {category}
+        </h3>
+        {isExpanded ? (
+          <ChevronDown className="h-4 w-4 text-neutral-400" />
+        ) : (
+          <ChevronRight className="h-4 w-4 text-neutral-400" />
+        )}
+      </div>
+      {isExpanded && (
+        <div className="space-y-2 px-2">
+          {components.map(({ key, label, color, description, icon }) => (
+            <div
+              key={key}
+              draggable
+              onDragStart={(event) => onDragStart(event, key)}
+              className="rounded-lg border border-neutral-100 p-3.5 cursor-move 
+                hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] 
+                transition-all duration-200 
+                hover:border-neutral-200"
+              style={{ backgroundColor: color }}
+            >
+              <div className="flex items-center gap-2.5">
+                {icon && (
+                  <img 
+                    src={icon.props.src} 
+                    alt={icon.props.alt} 
+                    className="h-5 w-5 object-contain opacity-80"
+                  />
+                )}
+                <div className="font-medium text-sm text-neutral-700">{label}</div>
+              </div>
+              {description && (
+                <p className="text-xs text-neutral-500 mt-1.5 leading-relaxed">{description}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const componentTypes = {
   // COMMON Components
@@ -363,16 +415,12 @@ const IamFlowDiagram = () => {
 
   return (
     <div className="flex flex-col h-screen bg-white font-sans">
-      {/* Header */}
       <header className="h-16 border-b border-neutral-100 flex items-center justify-between px-8">
         <h1 className="text-lg font-medium text-neutral-800 tracking-tight">we are the architects.</h1>
       </header>
 
-      {/* Main content area */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar */}
         <div className={`${isLeftCollapsed ? 'w-16' : 'w-[340px]'} bg-white border-r border-neutral-100 transition-all duration-300`}>
-          {/* Component List */}
           <div 
             className="overflow-y-auto h-[calc(100vh-4rem)] bg-white px-2
               [&::-webkit-scrollbar]:w-1.5
@@ -388,46 +436,17 @@ const IamFlowDiagram = () => {
               firefox:scrollbar-track-transparent"
           >
             {!isLeftCollapsed && Object.entries(groupedComponents).map(([category, components]) => (
-              <div key={category} className="py-6 first:pt-4">
-                <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wide px-4 mb-3">
-                  {category}
-                </h3>
-                <div className="space-y-2 px-2">
-                  {components.map(({ key, label, color, description, icon }) => (
-                    <div
-                      key={key}
-                      draggable
-                      onDragStart={(event) => onDragStart(event, key)}
-                      className="rounded-lg border border-neutral-100 p-3.5 cursor-move 
-                        hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] 
-                        transition-all duration-200 
-                        hover:border-neutral-200"
-                      style={{ backgroundColor: color }}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        {icon && (
-                          <img 
-                            src={icon.props.src} 
-                            alt={icon.props.alt} 
-                            className="h-5 w-5 object-contain opacity-80"
-                          />
-                        )}
-                        <div className="font-medium text-sm text-neutral-700">{label}</div>
-                      </div>
-                      {description && (
-                        <p className="text-xs text-neutral-500 mt-1.5 leading-relaxed">{description}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <ComponentCategory 
+                key={category} 
+                category={category} 
+                components={components} 
+                onDragStart={onDragStart} 
+              />
             ))}
           </div>
         </div>
 
-        {/* Main Flow Canvas */}
         <div className="flex-1 bg-neutral-50 relative">
-          {/* Title Overlay */}
           <div className="absolute top-6 left-6 z-10 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-neutral-100 shadow-sm">
             <h2 className="text-lg font-medium text-neutral-700 tracking-tight">
               {projectTitle}
@@ -533,7 +552,7 @@ const IamFlowDiagram = () => {
             </div>
           )}
         </div>
-      </div>
+        </div>
     </div>
   );
 };
